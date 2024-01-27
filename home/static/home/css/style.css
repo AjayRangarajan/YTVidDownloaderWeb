@@ -1,0 +1,13 @@
+body {
+    background-color: aliceblue;
+}
+
+footer {
+    color: aliceblue;
+    padding: 10px;
+    position: sticky;
+}
+
+.download-options {
+    padding-top: 10px;
+}

@@ -1,0 +1,5 @@
+NOT_AVAILABLE = "NA"
+NONE = "none"
+VIDEO_ONLY = "video_only"
+AUDIO_ONLY = "audio_only"
+VIDEO_WITH_AUDIO = "video_with_audio"

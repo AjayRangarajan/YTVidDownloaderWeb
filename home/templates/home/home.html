@@ -1,0 +1,132 @@
+{% extends 'home/home_layout.html' %}
+
+{% load static %}
+
+{% block head %}
+{% if messages %}
+    {% for message in messages %}
+        <div {% if message.tags %} class="alert alert-{{ message.tags }} text-center alert-dismissible fade show"{% else %} class="alert alert-info text-center alert-dismissible fade show" {% endif %} role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock head %}
+
+{% block body %}
+
+<div class="container mt-5 main-content">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-sm-12 mb-3 mb-md-0">
+            <form action="#" method="post" class="d-flex flex-column align-items-center" id="url-form">
+                {% csrf_token %}
+                <input type="text" name="url" id="url-input" class="form-control form-control-lg" placeholder="Enter YouTube Video URL" value="{% if url %}{{url}}{% endif %}" oninput="checkInput()">
+                <button type="submit" id="submit-url" class="btn btn-primary btn-lg mt-3 w-100" disabled>Search</button>
+            </form>
+        </div>
+    </div>
+    <br>
+ 
+    {% if video_id %}
+    <div class="video-details-container">
+        <div class="row justify-content-center">
+            <div class="col-md-4 col-sm-12">
+                <img src="{{ thumbnail_url }}" alt="{{ video_title }} - Thumbnail" class="img-fluid" id="thumbnailImage">
+                <br>
+                <h4 class="mt-2" id="videoTitle">{{ video_title }} <a href="{{channel_url}}" target="_blank" class="link-info link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{channel_name}}</a></h3>
+                <p><span class="badge bg-info text-dark">{{video_duration}}</span></p>
+                <div>
+                    <label for="download-type">Choose download type: </label>
+                    <select class="form-select bg-dark text-white" aria-label="Default select example" name="download-type" id="downloadType" onchange="viewSelectedFormat()">
+                        <option value="video_with_audio" id="videoWithAudioOption">Video with Audio</option>
+                        <option value="audio_only">Audio Only</option>
+                        <option value="video_only">Video Only</option>
+                        <option value="all_formats" selected>All formats</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5" id="formatsTableContainer">
+            <div class="col-md-8 col-sm-12 offset-md-2">
+                <table class="table table-bordered table-hover table-striped" id="formatsTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" id="colQuality">Quality</th>
+                            <th scope="col" id="colSize">Size</th>
+                            <th scope="col" id="colExtension">extension</th>
+                            <th scope="col" id="colDownloadLink">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if formats %}
+                            {% if formats.video_with_audio_formats %}
+                                {% for fmt in formats.video_with_audio_formats %}
+                                <tr class="video-with-audio-rows">
+                                    <td>{{ fmt.format_note }}</td>
+                                    {% if fmt.filesize %}
+                                        <td>{{ fmt.formatted_filesize }}</td>
+                                    {% elif fmt.filesize_approx %}
+                                        <td>{{ fmt.formatted_filesize_approx }}</td>
+                                    {% elif fmt.formatted_http_chunk_size %}
+                                        <td>{{ fmt.formatted_http_chunk_size }}</td>
+                                    {% else %}
+                                        <td>Not Available</td>
+                                    {% endif %}
+                                    <td>{{ fmt.ext }}</td>
+                                    <td><a href="{% url 'home:download' %}?url={{fmt.url|urlencode}}&filename={{video_title|urlencode}}&ext={{fmt.ext|urlencode}}&fmt_id={{fmt.format_id|urlencode}}" id="{{fmt.format_id}}"  class="btn btn-success download-links download-url-btn">Download</a></td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                            {% if formats.video_only_formats %}
+                                {% for fmt in formats.video_only_formats %}
+                                    <tr class="video-only-rows">
+                                        <td>{{ fmt.format_note }}</td>
+                                        {% if fmt.filesize %}
+                                            <td>{{ fmt.formatted_filesize }}</td>
+                                        {% elif fmt.filesize_approx %}
+                                            <td>{{ fmt.formatted_filesize_approx }}</td>
+                                        {% elif fmt.formatted_http_chunk_size %}
+                                            <td>{{ fmt.formatted_http_chunk_size }}</td>
+                                        {% else %}
+                                            <td>Not Available</td>
+                                        {% endif %}
+                                        <td>{{ fmt.ext }}</td>
+                                        <td><a href="{% url 'home:download' %}?url={{fmt.url|urlencode}}&filename={{video_title|urlencode}}&ext={{fmt.ext|urlencode}}&fmt_id={{fmt.format_id|urlencode}}" id="{{fmt.format_id}}"  class="btn btn-success download-links download-url-btn">Download</a></td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                            {% if formats.audio_only_formats %}
+                                {% for fmt in formats.audio_only_formats %}
+                                    <tr class="audio-only-rows">
+                                        <td>{{ fmt.format_note }}</td>
+                                        {% if fmt.filesize %}
+                                            <td>{{ fmt.formatted_filesize }}</td>
+                                        {% elif fmt.filesize_approx %}
+                                            <td>{{ fmt.formatted_filesize_approx }}</td>
+                                        {% elif fmt.formatted_http_chunk_size %}
+                                            <td>{{ fmt.formatted_http_chunk_size }}</td>
+                                        {% else %}
+                                            <td>Not Available</td>
+                                        {% endif %}
+                                        <td>{{ fmt.ext }}</td>
+                                        <td><a href="{% url 'home:download' %}?url={{fmt.url|urlencode}}&filename={{video_title|urlencode}}&ext={{fmt.ext|urlencode}}&fmt_id={{fmt.format_id|urlencode}}" id="{{fmt.format_id}}"  class="btn btn-success download-links download-url-btn">Download</a></td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        {% else %}
+                            <p>No formats available for download</p>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+
+{% endblock body %}
+
+{% block foot %}
+{% endblock foot %}
