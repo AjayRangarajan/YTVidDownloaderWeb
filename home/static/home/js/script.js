@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   videoOnlyRowElements.forEach(hideElement)
   let audioOnlyRowElements = document.querySelectorAll('.audio-only-rows')
   audioOnlyRowElements.forEach(hideElement)
-  let selectOption = document.querySelector('#downloadType')
-  selectOption.selectIndex = 1;
 })
 
 function checkInput() {
